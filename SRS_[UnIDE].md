@@ -28,8 +28,6 @@
 
 ## 4. 요구사항 정의 (Requirements description)
 
-## 4. 요구사항 정의 (Requirements description)
-
 | ID       | 업무명(기능) | 요약 (Summary) | 세부사항 (Detail requirements) |
 |----------|--------------|----------------|--------------------------------|
 | 1        | 회원가입	 |  |  |

@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-=======
 # Software Requirements Specification (SRS) (& System testing)
 
 ## 1. Project Title  
@@ -543,4 +541,3 @@
 | 61.1.2.6 |  |  |  |
 | 61.1.2.7 |  |  |  |
 | 61.1.2.7.1 |  |  |  |
->>>>>>> Stashed changes

@@ -10,7 +10,7 @@ UnIDE
 
 ## (Logo) - option
 
-![image.png](image.png)
+![Logo img](./images/Logo.png)
 
 ---
 
@@ -3676,7 +3676,7 @@ UnIDE는 서버와 웹사이트로 이루어져 있다. 웹사이트의 개발 �
 
 **4.1 Register**
 
-![그림 [4-1]](7266c440-b1b9-4dd9-9644-c89322b32dd4.png)
+![그림 [4-1]](./images/sds/4.1.png)
 
 그림 [4-1]
 
@@ -3684,7 +3684,7 @@ UnIDE는 서버와 웹사이트로 이루어져 있다. 웹사이트의 개발 �
 
 **4.2 Login**
 
-![그림 [4-2]](login.drawio.png)
+![그림 [4-2]](./images/sds/4.2.png)
 
 그림 [4-2]
 
@@ -3694,7 +3694,7 @@ UnIDE는 서버와 웹사이트로 이루어져 있다. 웹사이트의 개발 �
 
 **4.3 Reset password**
 
-![그림 [4-3]](image%202.png)
+![그림 [4-3]](./images/sds/4.3.png)
 
 그림 [4-3]
 
@@ -3706,9 +3706,9 @@ UnIDE는 서버와 웹사이트로 이루어져 있다. 웹사이트의 개발 �
 
 두 번째로, 모종의 사유로 기존 비밀번호를 재설정하는 경우다. 이 때 역시 password_reset_token db가 사용되어 비밀번호 재설정 시 진행되는 인증 메일을 관리한다.
 
-4.4 logout
+**4.4 Logout**
 
-![image.png](image%203.png)
+![그림 [4-4]](./images/sds/4.4.png)
 
 그림 [4-4]
 
@@ -3725,7 +3725,7 @@ server는 저장이 완료되면(save finished) main logic에 결과를 반환�
 
 **4.5 community create/view**
 
-![그림 [4-5]](image%204.png)
+![그림 [4-5]](./images/sds/4.5.png)
 
 그림 [4-5]
 
@@ -3741,7 +3741,7 @@ community 게시물 작성 시에는 community 관리, poll, tag, attachment 관
 
 **4.6 community update/delete**
 
-![그림 [4-6]](image%205.png)
+![그림 [4-6]](./images/sds/4.6.png)
 
 그림 [4-6]
 
@@ -3755,9 +3755,9 @@ community 게시물 작성 시에는 community 관리, poll, tag, attachment 관
 
 **4.7 problem create/update/delete/restore**
 
-![그림[4-7]](image%206.png)
+![그림 [4-7]](./images/sds/4.7.png)
 
-그림[4-7]
+그림 [4-7]
 
 위 그림 [4-7]은 문제 생성 수정 삭제 복구 를 다룬 use case를 나타낸 sequence diagram이다. 위의 diagram은 많은 내용을 담고 있기 때문에 login 과정에 대한 자세한 내용을 담고 있지 않다.
 
@@ -3775,7 +3775,7 @@ community 게시물 작성 시에는 community 관리, poll, tag, attachment 관
 
 **4.8.1**
 
-![그림 [4-8.1]](c3e43a3e-fc8e-42dd-958f-09d82ae15b72.png)
+![그림 [4-8.1]](./images/sds/4.8.1.png)
 
 그림 [4-8.1]
 
@@ -3785,9 +3785,9 @@ my page를 조회하기 위해서는 mypage db가 관여한다.
 
 **4.8.2** 
 
-![그림[4-8.2]](ed6c5534-e5bd-4998-889a-4362c39f4d29.png)
+![그림 [4-8.2]](./images/sds/4.8.2.png)
 
-그림[4-8.2]
+그림 [4-8.2]
 
 위 그림 [4-8.2]는 사용자가 본인이 아닌 다른 사람의 mypage를 조회하는 use case를 나타낸다.
 이 경우 또한 마찬가지로 login이 완료되어 있어야 한다.
@@ -3795,55 +3795,91 @@ my page를 조회하기 위해서는 mypage db가 관여한다.
 
 **4.9 view my submission**
 
-![그림[4-9]](image%207.png)
+![그림 [4-9]](./images/sds/4.9.png)
 
-그림[4-9]
+그림 [4-9]
 
 그림 [4-9]은 사용자가 자신이 제출했던 '제출 내역'을 확인하는 use case를나타낸 sequence diagram이다.
 '제출 내역'은 '마이 페이지'에서 확인 가능하며, 해당 과정에서는 my page db와 submission db가 관여한다. 만약 제출 내역이 없을 경우, 제출 내역이 없음을 나타내는 메시지를 반환하고 제출 내역이 있을 경우 해당 내용을 반환한다.
 
 **4.10 my page update**
 
-![image.png](image%208.png)
+![그림 [4-10]](./images/sds/4.10.png)
 
-**4.11 Admins view user list**
+**4.11 delete account**
 
-![image.png](image%209.png)
+![그림 [4-11]](./images/sds/4.11.png)
 
-위 그림 [4-11]은 관리자가 '전체 사용자 목록 조회'를 실행하는 use case를 나타낸 sequence diagram이다.
+그림 [4-11]은 사용자가 회원 탈퇴를 눌렀을 때 나타나는 흐름을 그린 시퀀스 다이어그램이다.
+
+사용자가 웹페이지의 탈퇴 버튼(onWithdrawClick())을 클릭하면, webpage는 main logic에 회원 탈퇴 요청(withdraw())을 전달한다.
+
+main logic은 먼저 사용자에게 탈퇴 의사를 다시 확인하기 위해 경고 알림(send warning alert)을 띄우고, 사용자의 응답(receive response)을 기다린다.
+
+사용자가 탈퇴를 확정하면, webpage는 비밀번호 입력창을 통해 사용자의 인증 정보를 요구(require password)한다.
+
+사용자가 비밀번호를 입력하면(send password), main logic은 이를 server(API)로 전달하여 인증(authenticate)을 수행한다.
+
+이후 server는 인증 결과(send result)를 main logic으로 반환하며,
+
+- 인증이 성공한 경우(main logic → server): 회원 데이터 삭제 요청(erase data)이 수행되고, 서버는 삭제 완료 결과를 반환한다.
+- 인증이 실패한 경우(main logic → webpage): 비밀번호 불일치 메시지(send fail message)가 사용자에게 전달된다.
+
+인증이 성공하여 탈퇴 절차가 완료되면, webpage는 탈퇴 완료 메시지를 표시하고 메인 페이지로 리디렉션(redirect to mainpage)하여 과정을 종료한다.
+
+**4.12 Admins view user list**
+
+![그림 [4-12]](./images/sds/4.12.png)
+
+위 그림 [4-12]은 관리자가 '전체 사용자 목록 조회'를 실행하는 use case를 나타낸 sequence diagram이다.
 먼저, 관리자가 '관리자 페이지'에 접근하기 위해서는 user db 가 관여하여 관리자 권한이 있는지 확인한다. 해당 권한이 있다면 '전체 사용자 목록 조회'가 가능하며, user db에서 데이터를 반환 받는다. 만약 db연동에 문제가 생긴다면 에러 메시지가 반환 된다.
 
-**4.12 change the user’s state**
+**4.13 change the user’s state**
 
-![그림[4-12]](image%2010.png)
-
-그림[4-12]
-
-위 그림 [4-12]은 관리자가 사용자의 상태를 공개, 비공개, 정지 등으로 바꿀 수 있는 use case의 sequence diagram이다.
-위 그림에서는 관리자가 UNIDE 전체 user list를 구하는 내용은 앞 4.10과 겹치기 때문에 예외 상황은 생략한다. 관리자는 user list에서 특정 사용자를 한 명 선택한 후, 상태 변경을 누르게 되면 사용자의 계정 상태는 변경 되고 user db는 update 된다. 해당 내용은 log에도 기록된다.
-만약 user db가 update 하는 과정에서 오류가 난다면 메시지를 반환한다.
-
-**4.13 admins view instructors’ application lists**
-
-![그림[4-13]](image%2011.png)
+![그림 [4-13]](./images/sds/4.13.png)
 
 그림[4-13]
 
-[그림 4-13]은 관리자가 관리자 페이지에서 강사 지원 목록을 조회하는 과정을 나타낸 시퀀스 다이어그램이다. 관리자가 로그인 후 페이지를 클릭하면 Admin Service가 JWT 토큰을 검증하고, Instructor Application DB로부터 지원서 목록을 조회한다.
+위 그림 [4-13]은 관리자가 사용자의 상태를 공개, 비공개, 정지 등으로 바꿀 수 있는 use case의 sequence diagram이다.
+위 그림에서는 관리자가 UNIDE 전체 user list를 구하는 내용은 앞 4.10과 겹치기 때문에 예외 상황은 생략한다. 관리자는 user list에서 특정 사용자를 한 명 선택한 후, 상태 변경을 누르게 되면 사용자의 계정 상태는 변경 되고 user db는 update 된다. 해당 내용은 log에도 기록된다.
+만약 user db가 update 하는 과정에서 오류가 난다면 메시지를 반환한다.
+
+**4.14 admins view instructors’ application lists**
+
+![그림 [4-14]](./images/sds/4.14.png)
+
+그림[4-14]
+
+[그림 4-14]은 관리자가 관리자 페이지에서 강사 지원 목록을 조회하는 과정을 나타낸 시퀀스 다이어그램이다. 관리자가 로그인 후 페이지를 클릭하면 Admin Service가 JWT 토큰을 검증하고, Instructor Application DB로부터 지원서 목록을 조회한다.
 
 조회가 성공하면 신청 내역이 화면에 표시되고, 실패 시 “강사 신청 정보를 불러올 수 없습니다.”라는 오류 메시지가 출력된다. 이 과정은 인증, 데이터 조회, 결과 반환의 순서로 진행된다.
 
-4.14
+**4.15 reject or approve instructor**
+
+![그림 [4-15]](./images/sds/4.15.png)
+
+[그림 4-15]는 관리자가 강사 신청 내역을 조회한 뒤, 승인 또는 반려를 처리하는 과정을 나타낸 시퀀스 다이어그램이다.
+
+관리자는 신청 정보를 확인한 후, 반려 시 Instructor Application DB에서 해당 신청을 삭제하고, 승인 시에는 User DB의 권한을 업데이트하여 강사로 등록한다. 각 과정은 JWT 인증을 거쳐 안전하게 수행되며, 처리 결과가 관리자 화면에 반환된다.
+
+**4.16 blacklist**
+
+![그림 [4-16]](./images/sds/4.16.png)
+
+그림 [4-16]는 관리자가 특정 사용자를 블랙리스트에 등록하는 과정을 나타낸 시퀀스 다이어그램이다.
+
+관리자가 로그인 후 사용자 상세 페이지에 접근하면, Admin Service가 JWT 토큰을 검증한 뒤 User DB에서 해당 사용자 정보를 조회한다.관리자가 블랙리스트 등록을 수행하면, Admin Service는 User DB의 상태 값을 업데이트하고 결과를 반환한다.이 과정을 통해 관리자는 비정상 사용자 계정을 제재할 수 있다.
+
+**4.17 Report Management**
 
 ---
 
 ## 5. State machine diagram
 
-[https://drive.google.com/file/d/17PqKTZuBthIxweG_30RKfS2sybvM5rmR/view](https://drive.google.com/file/d/17PqKTZuBthIxweG_30RKfS2sybvM5rmR/view)
-
-![state.drawio (2).png](state.drawio_(2).png)
+![그림 [5]](./images/sds/5.png)
 
 [그림 5 - state machine diagram]
+
 
 이곳엔 UnIDE 웹사이트의 상태 머신에 대해 서술한다. 위 그림은 본 프로젝트의 웹 애플리케이션 전반(페이지, 화면)과 문제 풀이 플로우(IDE 내부 서브머신)를 함께 표현한 상태머신 다이어그램이다. 각 상태는 사용자가 보는 화면에 대응하며, 문제 풀이 IDE는 코드작성 및 실행결과 과정에 함께 나타내었다. 
 

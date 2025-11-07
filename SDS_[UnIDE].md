@@ -3670,6 +3670,139 @@ UnIDE는 서버와 웹사이트로 이루어져 있다. 웹사이트의 개발 �
 
 아래 절부터 각 다이어그램에 대한 상세한 설명이 기술된다.
 
+### 3.2 도메인 모델 다이어그램
+
+3.2.1 사용자 및 계정
+
+![그림 [3-1]](./images/3.1.png)
+
+그림 [3-1]
+
+위 그림 [3-1]은 UnIDE 시스템의 가장 핵심적인 도메인인 ‘사용자’와 관련된 Entity 클래스를 보여준다.
+
+이 다이어그램은 모든 기능의 기반이 되는 User 클래스를 중심으로 설계되었다. User 클래스는 email, passwordHash와 같은 기본 인증 정보뿐만 아니라, 세 가지 주요 액터를 구분하는 Role Enum과, 이메일 인증 여부나 관리자에 의한 정지 상태를 관리하는 UserStatus Enum을 포함한다.
+
+또한, 강사 역할 지원 시 제출하는 UserPortfolioFile, 소셜 로그인을 위한 OAuthAccount, 그리고 회원가입 시 동의 내역을 관리하는 UserTermsConsent 클래스가 User 클래스와 1:N 종속 관계를 맺는 것을 보여준다.
+
+3.2.2 강사 인증
+
+![그림 [3-2]](./images/3.2.png)
+
+그림 [3-2]
+
+위 그림 [3-2]은 ‘강사 인증’ 기능과 관련된 Entity 클래스를 보여준다.
+
+이 다이어그램은 강사 역할(INSTRUCTOR) 신청을 처리하기 위한 InstructorApplication 클래스를 중심으로 설계되었다. InstructorApplication 클래스는 UnIDE_DB_설계.pdf 에 명시된 대로, 지원자의 포트폴리오 정보(portfolioFileUrl, portfolioLinks)를 저장하고, 관리자의 처리 상태를 나타내는 InstructorApplicationStatus Enum (PENDING, APPROVED, REJECTED)을 관리한다.
+또한, 이 엔티티는 User 클래스와 두 개의 명확한 관계를 맺는다. 첫째는 '지원자(user_id)'로서 User와 1:1 관계를, 둘째는 '처리한 관리자(processor_id)'로서 User와 1:N 관계를 맺는 것을 보여준다.
+
+3.2.3 사용자 인증
+
+![그림 [3-3]](./images/3.3.png)
+
+그림 [3-3]
+
+위 그림 [3-3]은 ‘사용자 인증’ 과정에서 사용되는 임시 인증 정보 Entity 클래스를 보여준다.
+
+이 다이어그램은 EmailVerificationCode와 PasswordResetToken 클래스를 중심으로 설계되었다. EmailVerificationCode는 UnIDE_DB_설계.pdf 에 정의된 대로, 회원가입 또는 비밀번호 재설정 시 사용되는 인증 토큰(verificationToken)과 그 목적(VerificationPurpose Enum)을 관리한다.
+
+또한, PasswordResetToken 클래스는 6자리 인증번호(verificationCode)와 실제 재설정 권한을 부여하는 resetToken을 별도로 관리하여, 2단계에 걸친 비밀번호 재설정 프로세스를 지원한다. 두 엔티티 모두 User 클래스와 1:N 관계를 맺는다.
+
+3.2.4 사용자 프로필 및 통계
+
+![그림 [3-4]](./images/3.4.png)
+
+그림 [3-4]
+
+그림 [3-4]는 사용자의 상세 프로필과 통계 데이터를 관리하는 Entity 클래스를 보여준다.
+
+이 다이어그램은 Mypage와 UserStats 클래스를 중심으로 설계되었다. Mypage 클래스는 사용자의 자기소개(introduction), 선호 언어(preferredLanguage), 프로필 공개 여부(ProfileVisibility Enum) 등 확장된 프로필 정보를 관리한다.
+
+또한, UserStats 클래스는 사용자의 학습 활동을 집계한 통계 데이터를 관리한다. 여기에는 총 해결 문제 수(totalSolved), 정답률(acceptanceRate), 연속 학습일(streakDays) 등이 포함된다. 두 클래스 모두 User 엔티티와 1:1 관계를 맺는다.
+
+3.2.5 문제
+
+![그림 [3-5]](./images/3.5.png)
+
+그림 [3-5]
+
+그림 [3-5]는 시스템의 핵심 콘텐츠인 '문제'와 관련된 Entity 클래스를 보여준다.
+
+이 다이어그램은 problems 테이블을 기반으로 하는 Problem 클래스를 중심으로 설계되었다. 이 클래스는 문제의 제목(title), 상세 설명(description), 난이도(Difficulty Enum), 시간/메모리 제한(time_limit, memory_limit) 등 문제 풀이에 필요한 모든 핵심 정보를 포함한다.
+
+또한, QnA_Post(A-8에서 정의)와 ProblemNum을 연결하기 위한 problem_post 연관 클래스가 포함되어, 특정 Q&A 게시글이 어떤 문제에 속해있는지를 N:M 관계로 정의한다.
+
+3.2.6 제출
+
+![그림 [3-6]](./images/3.6.png)
+
+그림 [3-6]
+
+그림 [3-6]은 '코드 실행 및 채점' 기능의 핵심 결과물인 '제출' Entity 클래스를 보여준다.
+
+이 다이어그램은 submissions 테이블을 기반으로 하는 Submission 클래스를 중심으로 설계되었다. 이 클래스는 사용자가 제출한 소스 코드(code), 사용 언어(ProgrammingLanguage Enum) 및 채점 결과(SubmissionStatus Enum)를 저장하는 핵심 엔티티이다.
+
+또한, 채점 완료 후의 성능 지표인 실행 시간(runtime), 메모리(memory) 및 통과한 테스트 케이스 수(passed_test_cases)를 포함한다. Submission 엔티티는 User(제출자)와 Problem(대상 문제)에 대해 각각 1:N 관계를 맺는다.
+
+3.2.7 토론 게시판
+
+![그림 [3-7]](./images/3.7.png)
+
+그림 [3-7]
+
+그림 [3-7]은 '커뮤니티' 기능의 핵심인 '토론 게시판' 관련 Entity 클래스들을 보여준다.
+
+이 다이어그램은 discuss 테이블을 기반으로 하는 Discuss (게시글) 클래스를 중심으로 설계되었다. Discuss 클래스는 User (작성자)와 1:N 관계를 맺는다.
+
+또한, 게시글은 DiscussComment (댓글) 및 DisAttach (첨부파일) 와 1:N 관계를, DisPoll (투표) 과는 1:1 관계를 가진다. DisTag (태그) 와는 post_tag  연결 테이블을 통해 N:M 관계를 맺는다. dis_post_like 와 dis_comment_like 는 사용자와 각 게시글/댓글 간의 '좋아요'를 기록하는 N:M 연결 클래스이다.
+
+3.2.8 Q&A 게시판
+
+![그림 [3-8]](./images/3.8.png)
+
+그림 [3-8]
+
+그림 [3-8]은 '문제별 Q&A' 기능 관련 Entity 클래스들을 보여준다.
+
+이 다이어그램은 QnA_Post (질문) 클래스를 중심으로 설계되었다. A-7의 토론 게시판과 유사하게, QnA_Post는 QnA_comment (답변) , QnA_attach (첨부파일) , QnA_poll (투표)  등과 관계를 맺는다.
+
+3-7. 토론 게시판과의 가장 큰 차이점은, QnA_Post가 problem_post 연결 테이블을 통해 A-5에서 정의된 ProblemNum  엔티티와 N:M 관계를 맺는다는 점이다. 이는 각 질문이 특정 문제에 종속됨을 의미한다.
+
+3.2.9 관리
+
+![그림 [3-9]](./images/3.9.png)
+
+그림 [3-9]
+
+그림 [3-9]는 관리자 기능의 핵심인 '블랙리스트' 및 '신고' 관련 Entity 클래스를 보여준다.
+
+Blacklist 클래스는 회원가입이 차단된 사용자의 이메일, 전화번호 등을 관리하며, 이를 등록한 '관리자(banned_by_id)'와 User 엔티티의 관계를 보여준다.
+
+또한, Report 클래스는 User 엔티티와 세 가지 다른 관계를 맺는다. 이는 각각 '신고자(reporter_id)', '피신고자(reported_user_id)', 그리고 '신고를 처리한 관리자(manager_id)' 로서 User를 참조하는 것을 나타낸다.
+
+3.2.10 학습 확장
+
+![그림 [3-10]](./images/3.10.png)
+
+그림 [3-10]
+
+그림 [3-10]은 '학습 확장' 기능을 지원하기 위해 추론된 Entity 클래스를 보여준다.
+
+이 다이어그램은 Course (강좌)와 Curriculum (커리큘럼) 클래스를 중심으로 설계되었다. Course는 강사(User)가 등록하며, Lecture (세부 강의, 영상/문서) 와 1:N 관계를 맺는다. Curriculum은 Course 및 Problem 엔티티와 N:M 관계(연결 클래스 사용)를 맺어 "학습 경로" 를 구성한다.
+
+또한, UserCourseEnrollment는 학습자(User)와 강좌(Course)의 수강 관계 를, CourseQnA 와 CourseRating 은 각각 강좌별 문의 및 평점 기능을 지원한다.
+
+3.2.11 스터디 그룹
+
+![그림 [3-11]](./images/3.11.png)
+
+그림 [3-11]
+
+그림 [3-11]은 '스터디 그룹' 기능을 지원하기 위해 추론된 Entity 클래스를 보여준다.
+
+이 다이어그램은 StudyGroup 클래스 를 중심으로 설계되었다. StudyGroup과 User는 StudyGroupMember 연결 클래스를 통해 N:M 관계를 맺으며, 이때 StudyGroupMember는 해당 유저의 그룹 내 역할(GroupMemberRole Enum: LEADER, MEMBER)을 정의한다.
+
+또한, 그룹장은 StudyGroupProblem 연결 클래스를 통해 Problem 엔티티와 N:M 관계를 맺어 그룹 전용 문제를 지정할 수 있다. StudyGroupDiscussion 과 StudyGroupActivityLog 는 각각 그룹 전용 토론과 활동 기록을 관리한다.
+
 ---
 
 ## 4. Sequence diagram

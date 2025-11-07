@@ -57,8 +57,8 @@ UnIDE
 1. Introduction - 전유진
 2. Use Case Analysis - 노우현, 정석희
 3. Class diagram - 노우현, 정석희
-4. Sequence diagram - 정보경
-5. State machiene diagram
+4. Sequence diagram - 정보경, 김형섭
+5. State machiene diagram - 김형섭
 6. User interface prototype - 전유진
 7. Implementation requirements - 전유진
 8. Glossary

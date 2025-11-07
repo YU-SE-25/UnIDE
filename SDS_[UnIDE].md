@@ -32,7 +32,7 @@ UnIDE
 
 | Revision date | Version # | Description | Author |
 | --- | --- | --- | --- |
-| MM/DD/YYYY | 0.00 | Type brief description here | Author name |
+| 10/10/2025 | 1.0 | 초안 작성 | 노우현, 김형섭, 전유진, 정석희, 정보경 |
 |  |  |  |  |
 |  |  |  |  |
 

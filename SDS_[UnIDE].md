@@ -108,7 +108,7 @@ UnIDE는 서버와 웹사이트로 이루어져 있다. 웹사이트의 개발 �
     - Community : 커뮤니티 및 풀이 공유
     - LearningExapand : 학습 확장
 
-![image.png](image%201.png)
+![그림 [2-1]](./images/sds/2.1.png)
 
 [그림 2-1]은 UnIDE 시스템의 Use Case Diagram을 나타낸 것이다.
 

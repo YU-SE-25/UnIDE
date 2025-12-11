@@ -5130,7 +5130,7 @@ Guide DB에서 매핑된 가이드가 존재하는 경우, IDE는 개선 설명�
 
 **4.38 Create Study Group**
 
-![그림 [4-38]](./images/sds/4.38.png)
+![그림 [4-38]](./images/sds/studygroup%20create.drawio.png)
 
 그림 [4-38]
 
@@ -5181,6 +5181,27 @@ Guide DB에서 매핑된 가이드가 존재하는 경우, IDE는 개선 설명�
 위 그림 4-44은 사용자가 자신이 속한 스터디 그룹의 세션을 생성하거나 참여하는 과정을 나타낸 시퀀스 다이어그램이다.
 사용자가 스터디 그룹에 접속하면 Study Group Service가 권한을 확인한 뒤, Study Group DB와 Member DB를 업데이트하여 세션 정보를 등록한다.
 이후 시스템은 세션 참여 결과를 사용자에게 반환한다.
+
+**4.45 Study Group Delete**
+![그림[4-45]](./images/sds/studygroup%20delete.drawio.png)
+
+그림 [4-45]
+
+위 그림 4-45는 사용자가 자신이 생성한 스터디 그룹을 삭제하는 과정을 나타낸 시퀀스 다이어그램이다.
+사용자가 메인 페이지에서 스터디 그룹 서비스를 선택한 뒤 그룹 삭제를 요청하면, Study Group Service는 Study Group DB를 통해 해당 사용자가 그룹 리더인지 먼저 확인한다.
+리더임이 확인되면 Study Group Service는 Study Group DB, Member DB, Study Group Discuss Board DB, Study Group Log DB, Study Group Problem DB에 순차적으로 삭제 요청을 보내 그룹과 관련된 모든 데이터를 제거한다.
+모든 삭제 작업이 완료되면 시스템은 삭제 완료 메시지를 사용자에게 반환한다.
+
+**4.46 Study Group Specifies Problem**
+![그림[4-46]](./images/sds/studygroup%20specify%20problem.drawio.png)
+
+그림[4-46]
+
+위 그림 4-46은 사용자가 스터디 그룹에 문제를 지정하는 과정을 나타낸 시퀀스 다이어그램이다.
+사용자가 스터디 그룹 서비스에 접속하면 시스템은 먼저 Study Group Member DB를 조회하여 해당 사용자의 권한을 확인한다.
+권한 검증이 완료되면, 시스템은 Problem DB로부터 사용자가 선택한 문제 정보를 조회한 뒤, Study Group Problem DB에 문제 지정 정보를 등록한다.
+모든 과정이 정상적으로 수행되면 시스템은 문제 지정 완료 메시지를 사용자에게 반환한다.
+
 
 ---
 

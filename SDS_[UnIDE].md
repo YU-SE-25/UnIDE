@@ -32,7 +32,7 @@ UnIDE
 
 | Revision date | Version # | Description | Author |
 | --- | --- | --- | --- |
-| MM/DD/YYYY | 0.00 | Type brief description here | Author name |
+| 10/10/2025 | 1.0 | 초안 작성 | 노우현, 김형섭, 전유진, 정석희, 정보경 |
 |  |  |  |  |
 |  |  |  |  |
 
@@ -3670,6 +3670,874 @@ UnIDE는 서버와 웹사이트로 이루어져 있다. 웹사이트의 개발 �
 
 아래 절부터 각 다이어그램에 대한 상세한 설명이 기술된다.
 
+### 3.2 도메인 모델 다이어그램
+
+3.2.1 사용자 및 계정
+
+![그림 [3-1]](./images/sds/3.1.png)
+
+그림 [3-1]
+
+위 그림 [3-1]은 UnIDE 시스템의 가장 핵심적인 도메인인 ‘사용자’와 관련된 Entity 클래스를 보여준다.
+
+이 다이어그램은 모든 기능의 기반이 되는 User 클래스를 중심으로 설계되었다. User 클래스는 email, passwordHash와 같은 기본 인증 정보뿐만 아니라, 세 가지 주요 액터를 구분하는 Role Enum과, 이메일 인증 여부나 관리자에 의한 정지 상태를 관리하는 UserStatus Enum을 포함한다.
+
+또한, 강사 역할 지원 시 제출하는 UserPortfolioFile, 소셜 로그인을 위한 OAuthAccount, 그리고 회원가입 시 동의 내역을 관리하는 UserTermsConsent 클래스가 User 클래스와 1:N 종속 관계를 맺는 것을 보여준다.
+
+3.2.2 강사 인증
+
+![그림 [3-2]](./images/sds/3.2.png)
+
+그림 [3-2]
+
+위 그림 [3-2]은 ‘강사 인증’ 기능과 관련된 Entity 클래스를 보여준다.
+
+이 다이어그램은 강사 역할(INSTRUCTOR) 신청을 처리하기 위한 InstructorApplication 클래스를 중심으로 설계되었다. InstructorApplication 클래스는 UnIDE_DB_설계.pdf 에 명시된 대로, 지원자의 포트폴리오 정보(portfolioFileUrl, portfolioLinks)를 저장하고, 관리자의 처리 상태를 나타내는 InstructorApplicationStatus Enum (PENDING, APPROVED, REJECTED)을 관리한다.
+또한, 이 엔티티는 User 클래스와 두 개의 명확한 관계를 맺는다. 첫째는 '지원자(user_id)'로서 User와 1:1 관계를, 둘째는 '처리한 관리자(processor_id)'로서 User와 1:N 관계를 맺는 것을 보여준다.
+
+3.2.3 사용자 인증
+
+![그림 [3-3]](./images/sds/3.3.png)
+
+그림 [3-3]
+
+위 그림 [3-3]은 ‘사용자 인증’ 과정에서 사용되는 임시 인증 정보 Entity 클래스를 보여준다.
+
+이 다이어그램은 EmailVerificationCode와 PasswordResetToken 클래스를 중심으로 설계되었다. EmailVerificationCode는 UnIDE_DB_설계.pdf 에 정의된 대로, 회원가입 또는 비밀번호 재설정 시 사용되는 인증 토큰(verificationToken)과 그 목적(VerificationPurpose Enum)을 관리한다.
+
+또한, PasswordResetToken 클래스는 6자리 인증번호(verificationCode)와 실제 재설정 권한을 부여하는 resetToken을 별도로 관리하여, 2단계에 걸친 비밀번호 재설정 프로세스를 지원한다. 두 엔티티 모두 User 클래스와 1:N 관계를 맺는다.
+
+3.2.4 사용자 프로필 및 통계
+
+![그림 [3-4]](./images/sds/3.4.png)
+
+그림 [3-4]
+
+그림 [3-4]는 사용자의 상세 프로필과 통계 데이터를 관리하는 Entity 클래스를 보여준다.
+
+이 다이어그램은 Mypage와 UserStats 클래스를 중심으로 설계되었다. Mypage 클래스는 사용자의 자기소개(introduction), 선호 언어(preferredLanguage), 프로필 공개 여부(ProfileVisibility Enum) 등 확장된 프로필 정보를 관리한다.
+
+또한, UserStats 클래스는 사용자의 학습 활동을 집계한 통계 데이터를 관리한다. 여기에는 총 해결 문제 수(totalSolved), 정답률(acceptanceRate), 연속 학습일(streakDays) 등이 포함된다. 두 클래스 모두 User 엔티티와 1:1 관계를 맺는다.
+
+3.2.5 문제
+
+![그림 [3-5]](./images/sds/3.5.png)
+
+그림 [3-5]
+
+그림 [3-5]는 시스템의 핵심 콘텐츠인 '문제'와 관련된 Entity 클래스를 보여준다.
+
+이 다이어그램은 problems 테이블을 기반으로 하는 Problem 클래스를 중심으로 설계되었다. 이 클래스는 문제의 제목(title), 상세 설명(description), 난이도(Difficulty Enum), 시간/메모리 제한(time_limit, memory_limit) 등 문제 풀이에 필요한 모든 핵심 정보를 포함한다.
+
+또한, QnA_Post(A-8에서 정의)와 ProblemNum을 연결하기 위한 problem_post 연관 클래스가 포함되어, 특정 Q&A 게시글이 어떤 문제에 속해있는지를 N:M 관계로 정의한다.
+
+3.2.6 제출
+
+![그림 [3-6]](./images/sds/3.6.png)
+
+그림 [3-6]
+
+그림 [3-6]은 '코드 실행 및 채점' 기능의 핵심 결과물인 '제출' Entity 클래스를 보여준다.
+
+이 다이어그램은 submissions 테이블을 기반으로 하는 Submission 클래스를 중심으로 설계되었다. 이 클래스는 사용자가 제출한 소스 코드(code), 사용 언어(ProgrammingLanguage Enum) 및 채점 결과(SubmissionStatus Enum)를 저장하는 핵심 엔티티이다.
+
+또한, 채점 완료 후의 성능 지표인 실행 시간(runtime), 메모리(memory) 및 통과한 테스트 케이스 수(passed_test_cases)를 포함한다. Submission 엔티티는 User(제출자)와 Problem(대상 문제)에 대해 각각 1:N 관계를 맺는다.
+
+3.2.7 토론 게시판
+
+![그림 [3-7]](./images/sds/3.7.png)
+
+그림 [3-7]
+
+그림 [3-7]은 '커뮤니티' 기능의 핵심인 '토론 게시판' 관련 Entity 클래스들을 보여준다.
+
+이 다이어그램은 discuss 테이블을 기반으로 하는 Discuss (게시글) 클래스를 중심으로 설계되었다. Discuss 클래스는 User (작성자)와 1:N 관계를 맺는다.
+
+또한, 게시글은 DiscussComment (댓글) 및 DisAttach (첨부파일) 와 1:N 관계를, DisPoll (투표) 과는 1:1 관계를 가진다. DisTag (태그) 와는 post_tag  연결 테이블을 통해 N:M 관계를 맺는다. dis_post_like 와 dis_comment_like 는 사용자와 각 게시글/댓글 간의 '좋아요'를 기록하는 N:M 연결 클래스이다.
+
+3.2.8 Q&A 게시판
+
+![그림 [3-8]](./images/sds/3.8.png)
+
+그림 [3-8]
+
+그림 [3-8]은 '문제별 Q&A' 기능 관련 Entity 클래스들을 보여준다.
+
+이 다이어그램은 QnA_Post (질문) 클래스를 중심으로 설계되었다. A-7의 토론 게시판과 유사하게, QnA_Post는 QnA_comment (답변) , QnA_attach (첨부파일) , QnA_poll (투표)  등과 관계를 맺는다.
+
+3-7. 토론 게시판과의 가장 큰 차이점은, QnA_Post가 problem_post 연결 테이블을 통해 A-5에서 정의된 ProblemNum  엔티티와 N:M 관계를 맺는다는 점이다. 이는 각 질문이 특정 문제에 종속됨을 의미한다.
+
+3.2.9 관리
+
+![그림 [3-9]](./images/sds/3.9.png)
+
+그림 [3-9]
+
+그림 [3-9]는 관리자 기능의 핵심인 '블랙리스트' 및 '신고' 관련 Entity 클래스를 보여준다.
+
+Blacklist 클래스는 회원가입이 차단된 사용자의 이메일, 전화번호 등을 관리하며, 이를 등록한 '관리자(banned_by_id)'와 User 엔티티의 관계를 보여준다.
+
+또한, Report 클래스는 User 엔티티와 세 가지 다른 관계를 맺는다. 이는 각각 '신고자(reporter_id)', '피신고자(reported_user_id)', 그리고 '신고를 처리한 관리자(manager_id)' 로서 User를 참조하는 것을 나타낸다.
+
+3.2.10 학습 확장
+
+![그림 [3-10]](./images/sds/3.10.png)
+
+그림 [3-10]
+
+그림 [3-10]은 '학습 확장' 기능을 지원하기 위해 추론된 Entity 클래스를 보여준다.
+
+이 다이어그램은 Course (강좌)와 Curriculum (커리큘럼) 클래스를 중심으로 설계되었다. Course는 강사(User)가 등록하며, Lecture (세부 강의, 영상/문서) 와 1:N 관계를 맺는다. Curriculum은 Course 및 Problem 엔티티와 N:M 관계(연결 클래스 사용)를 맺어 "학습 경로" 를 구성한다.
+
+또한, UserCourseEnrollment는 학습자(User)와 강좌(Course)의 수강 관계 를, CourseQnA 와 CourseRating 은 각각 강좌별 문의 및 평점 기능을 지원한다.
+
+3.2.11 스터디 그룹
+
+![그림 [3-11]](./images/sds/3.11.png)
+
+그림 [3-11]
+
+그림 [3-11]은 '스터디 그룹' 기능을 지원하기 위해 추론된 Entity 클래스를 보여준다.
+
+이 다이어그램은 StudyGroup 클래스 를 중심으로 설계되었다. StudyGroup과 User는 StudyGroupMember 연결 클래스를 통해 N:M 관계를 맺으며, 이때 StudyGroupMember는 해당 유저의 그룹 내 역할(GroupMemberRole Enum: LEADER, MEMBER)을 정의한다.
+
+또한, 그룹장은 StudyGroupProblem 연결 클래스를 통해 Problem 엔티티와 N:M 관계를 맺어 그룹 전용 문제를 지정할 수 있다. StudyGroupDiscussion 과 StudyGroupActivityLog 는 각각 그룹 전용 토론과 활동 기록을 관리한다.
+
+###3.3 데이터 전송 객체 다이어그램
+
+ 본 장에서는 UnIDE 시스템의 전송 데이터 구조를 정의하기 위해, 주요 기능 영역별로 설계된 데이터 전송 객체(Data Transfer Object, DTO)를 정리하였다. DTO는 클라이언트와 서버 간의 요청(Request) 및 응답(Response) 데이터를 명확히 구분하여 관리함으로써, API 계층의 일관성과 확장성, 보안성을 보장한다. 이를 위해 본 시스템의 DTO는 기능별로 다음 여섯 개 그룹으로 구분된다. “사용자 및 인증 관련 DTO”, “프로필 관리 관련 DTO”, “문제 및 채점 기능 DTO”, “커뮤니티 기능 DTO”, “관리자 기능 DTO”. “학습 확장 모듈(SRS 기반) DTO” 로 각 그룹의 DTO는 관련 API 명세서에 근거하여 설계되었으며, 하위 클래스 간의 관계를 클래스 다이어그램 형태로 시각화하였다.
+
+3.3.1 사용자 및 인증 DTO 
+
+![3.3.1.png](./images/sds/3.3.1.png)
+
+| Class Diagram #1 : LoginRequest |  |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Class
+Description | 사용자가 로그인 시 입력한 데이터를 서버에 전송하는 객체 class |  |  |  |  |  |  |  |
+| 구분 | Name |  |  |  | Type | Visibility |  |  |
+|  | Description |  |  |  |  |  |  |  |
+| Attributes | email |  |  |  | VARCHAR(255) | public |  |  |
+|  | 로그인용 이메일 |  |  |  |  |  |  |  |
+|  | password_hash |  |  | VARCHAR(255) |  | public |  |  |
+|  | 암호화된 비밀번호 |  |  |  |  |  |  |  |
+| 구분 | Name | Type |  |  |  |  |  | Visibility |
+|  | Desciption |  |  |  |  |  |  |  |
+| Operations | 없음 |  | 없음 |  |  |  | 없음 |  |
+|  | 없음 |  |  |  |  |  |  |  |
+
+| Class Diagram #2 : RegisterRequest |  |  |  |
+| --- | --- | --- | --- |
+| Class
+Description | 사용자가 회원가입 시 입력한 데이터를 서버에 전송하는 객체 class |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Description |  |  |
+| 
+Attributes | email | VARCHAR(255) | public |
+|  | 회원 이메일(중복 불가) |  |  |
+|  | password_hash | VARCHAR(255) | public |
+|  | 암호화된 비밀번호 |  |  |
+|  | nickname | VARCHAR(50) | public |
+|  | 사용자 닉네임 |  |  |
+|  | role | String | public |
+|  | 사용자 강사/학습자/관리자 역할 구분 |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Desciption |  |  |
+| Operations | 없음 | 없음 | 없음 |
+|  | 없음 |  |  |
+
+| Class Diagram #3 : EmailCheck |  |  |  |
+| --- | --- | --- | --- |
+| Class
+Description | 회원가입 시 입력한 이메일의 중복 여부를 확인하기 위한 객체 class |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Description |  |  |
+| 
+Attributes
+ | email | VARCHAR(255) | public |
+|  | 로그인/알림용으로 사용하기 위해 입력한 이메일 |  |  |
+|  | isAvailable | boolean | public |
+|  | 사용 가능 여부 |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Desciption |  |  |
+| Operations | 없음 | 없음 | 없음 |
+|  | 없음 |  |  |
+
+| Class Diagram #4 : TokenResponse |  |  |  |
+| --- | --- | --- | --- |
+| Class
+Description | 로그인/회원가입 후 서버가 클라이언트에 반환하는 응답 객체 class |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Description |  |  |
+| 
+Attributes | accessToken | VARCHAR(255) | public |
+|  | 실제 API호출 시 사용하는 JWT |  |  |
+|  | refreshToken | VARCHAR(255) | public |
+|  | 재발급용 토큰 |  |  |
+|  | tokenType | String | public |
+|  | "Bearer"(OAuth 표준 방식) |  |  |
+|  | expiresAt | LocalDateTime | public |
+|  | 토큰 만료 시각 |  |  |
+|  | user_id | BIGINT | public |
+|  | 로그인한 사용자 ID |  |  |
+|  | role | String | public |
+|  | 사용자 권한 |  |  |
+|  | email | VARCHAR(255)` | public |
+|  | 로그인한 이메일 |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Desciption |  |  |
+| Operations | 없음 | 없음 | 없음 |
+|  | 없음 |  |  |
+
+3.3.2 프로필 DTO
+
+![3.3.2.png](./images/sds/3.3.2.png)
+
+| Class Diagram #5 : MyPageResponse |  |  |  |
+| --- | --- | --- | --- |
+| Class
+Description | 사용자 프로필 정보를 조회할 때 서버가 클라이언트로 반환하는 응답 객체 class |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Description |  |  |
+| 
+Attributes | user_id | BIGINT | public |
+|  | 사용자 고유 식별자 |  |  |
+|  | nickname | VARCHAR(50) | public |
+|  | 사용자 닉네임 |  |  |
+|  | avatar | String | public |
+|  | 프로필 아바타 여부 또는 이미지 존재 여부 |  |  |
+|  | introduction | TEXT | public |
+|  | 자기소개 문구 |  |  |
+|  | preferred_language | String[0..*] | public |
+|  | 사용자가 선호하는 프로그래밍 언어 목록 |  |  |
+|  | stats | UserStatsResponse | public |
+|  | 사용자 통계 정보를 포함하는 하위 객체 |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Desciption |  |  |
+| Operations | 없음 | 없음 | 없음 |
+|  | 없음 |  |  |
+
+| Class Diagram #6 : MyPageUpdateRequest |  |  |  |
+| --- | --- | --- | --- |
+| Class
+Description | 사용자가 자신의 프로필을 수정할 때 서버로 전송하는 요청 객체 class |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Description |  |  |
+| 
+Attributes | nickname | VARCHAR(50) | public |
+|  | 수정할 닉네임 |  |  |
+|  | avatar | boolean | public |
+|  | 수정할 프로필 이미지 존재 여부 |  |  |
+|  | introduction | TEXT | public |
+|  | 수정할 자기소개 문구 |  |  |
+|  | preferred_language | String[0..*] | public |
+|  | 수정할 선호 언어 목록 |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Desciption |  |  |
+| Operations | 없음 | 없음 | 없음 |
+|  | 없음 |  |  |
+
+| Class Diagram #7 : UserStatsResponse |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- |
+| Class
+Description | 사용자의 학습 활동 데이터를 요약해 반환하는 객체 class |  |  |  |  |
+| 구분 | Name | Type |  | Visibility |  |
+|  | Description |  |  |  |  |
+| 
+Attributes | totalSolved | INT |  | public |  |
+|  | 사용자가 푼 문제 수 |  |  |  |  |
+|  | totalSubmitted | INT |  | public |  |
+|  | 총 제출 횟수 |  |  |  |  |
+|  | acceptanceRate | DOUBLE |  | public |  |
+|  | 정답률(%) |  |  |  |  |
+|  | streakDays | INT |  | public |  |
+|  | 연속 학습 일수 |  |  |  |  |
+|  | rank |  | INT |  | public |
+|  | 사용자 전체 랭킹 |  |  |  |  |
+|  | rating |  | INT |  | public |
+|  | 점수 기반 실력 지표 |  |  |  |  |
+| 구분 | Name | Type |  | Visibility |  |
+|  | Desciption |  |  |  |  |
+| Operations | 없음 | 없음 |  | 없음 |  |
+|  | 없음 |  |  |  |  |
+
+3.3.3 문제 및 채점 DTO
+
+![3.3.3.png](./images/sds/3.3.3.png)
+
+| Class Diagram #8 : ProblemListResponse |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- |
+| Class
+Description | 사용자의 학습 활동 데이터를 요약해 반환하는 객체 class |  |  |  |  |
+| 구분 | Name | Type |  | Visibility |  |
+|  | Description |  |  |  |  |
+| 
+Attributes | problem_id | BIGINT |  | public |  |
+|  | 문제 고유 식별자 |  |  |  |  |
+|  | title | VARCHAR(50) |  | public |  |
+|  | 문제 제목 |  |  |  |  |
+|  | difficulty | String[] |  | public |  |
+|  | 난이도(Easy, Medium, Hard 등) |  |  |  |  |
+|  | view | INT |  | public |  |
+|  | 조회수 |  |  |  |  |
+|  | successRate |  | DOUBLE |  | public |
+|  | 문제 정답률(%) |  |  |  |  |
+| 구분 | Name | Type |  | Visibility |  |
+|  | Desciption |  |  |  |  |
+| Operations | 없음 | 없음 |  | 없음 |  |
+|  | 없음 |  |  |  |  |
+
+| Class Diagram #9 : ProblemDetailResponse |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Class
+Description | 사용자의 학습 활동 데이터를 요약해 반환하는 객체 class |  |  |  |  |  |  |
+| 구분 | Name | Type |  |  | Visibility |  |  |
+|  | Description |  |  |  |  |  |  |
+| 
+Attributes | problem_id | BIGINT |  |  | public |  |  |
+|  | 문제 고유 식별자 |  |  |  |  |  |  |
+|  | title | VARCHAR(50) |  |  | public |  |  |
+|  | 문제 제목 |  |  |  |  |  |  |
+|  | difficulty | String[] |  |  | public |  |  |
+|  | 난이도(Easy, Medium, Hard 등) |  |  |  |  |  |  |
+|  | view | INT |  |  | public |  |  |
+|  | 조회수 |  |  |  |  |  |  |
+|  | successRate |  | DOUBLE |  |  | public |  |
+|  | 문제 정답률(%) |  |  |  |  |  |  |
+|  | inputOutputExample |  |  | TEXT |  |  | public |
+|  | 입출력 예시 |  |  |  |  |  |  |
+|  | timeLimit |  |  | INT |  |  | public |
+|  | 실행 시간 제한(ms단위) |  |  |  |  |  |  |
+|  | memoryLimit |  |  | INT |  |  | public |
+|  | 메모리 제한(MB단위) |  |  |  |  |  |  |
+|  | tags |  |  | Strig[0...*] |  |  | public |
+|  | 문제 관련 태그 리스트 |  |  |  |  |  |  |
+| 구분 | Name | Type |  |  | Visibility |  |  |
+|  | Desciption |  |  |  |  |  |  |
+| Operations | 없음 | 없음 |  |  | 없음 |  |  |
+|  | 없음 |  |  |  |  |  |  |
+
+| Class Diagram #10 : SubmissionRequest |  |  |  |
+| --- | --- | --- | --- |
+| Class
+Description | 사용자가 문제 풀이를 제출할 때 서버로 전송하는 요청 객체 class |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Description |  |  |
+| 
+Attributes
+ | problem_id | BIGINT | public |
+|  | 제출 대상 문제의 ID |  |  |
+|  | code | TEXT | public |
+|  | 제출한 코드 내용 |  |  |
+|  | language | String[] | public |
+|  | 사용한 프로그래밍 언어(Python, C++ 등) |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Desciption |  |  |
+| Operations | 없음 | 없음 | 없음 |
+|  | 없음 |  |  |
+
+| Class Diagram #11 : SubmissionStatusResponse |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Class
+Description | 사용자의 학습 활동 데이터를 요약해 반환하는 객체 class |  |  |  |  |  |  |
+| 구분 | Name | Type |  |  | Visibility |  |  |
+|  | Description |  |  |  |  |  |  |
+| 
+Attributes
+ | submission_id | BIGINT |  |  | public |  |  |
+|  | 제출 식별자 |  |  |  |  |  |  |
+|  | status | String[] |  |  | public |  |  |
+|  | 결과 상태(Accepted, Wrong Anser, Time Limit Exceeded 등) |  |  |  |  |  |  |
+|  | runtime | INT |  |  | public |  |  |
+|  | 실행 시간(ms) |  |  |  |  |  |  |
+|  | memory | INT |  |  | public |  |  |
+|  | 메모리 사용량 (KB) |  |  |  |  |  |  |
+|  | passedTestCases |  | INT |  |  | public |  |
+|  | 통과한 테스트 케이스 수 |  |  |  |  |  |  |
+|  | totalTestCases |  |  | INT |  |  | public |
+|  | 전체 테스트 케이스 수 |  |  |  |  |  |  |
+|  | compileOutput |  |  | VARCHAR(255) |  |  | public |
+|  | 컴파일 결과 또는 오류 메시지 |  |  |  |  |  |  |
+| 구분 | Name | Type |  |  | Visibility |  |  |
+|  | Desciption |  |  |  |  |  |  |
+| Operations | 없음 | 없음 |  |  | 없음 |  |  |
+|  | 없음 |  |  |  |  |  |  |
+
+| Class Diagram #12 : CodeRunRequest |  |  |  |
+| --- | --- | --- | --- |
+| Class
+Description | 사용자가 실시간으로 코드를 실행할 때 서버로 전송하는 요청하는 객체class |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Description |  |  |
+| 
+Attributes
+ | code | TEXT | public |
+|  | 실행할 코드 내용 |  |  |
+|  | language | String[] | public |
+|  | 코드 언어 |  |  |
+|  | input | TEXT | public |
+|  | 실행 시 입력 값 |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Desciption |  |  |
+| Operations | 없음 | 없음 | 없음 |
+|  | 없음 |  |  |
+
+| Class Diagram #13 : CodeRunResponse |  |  |  |
+| --- | --- | --- | --- |
+| Class
+Description | 사용자가 실시간으로 코드를 실행할 때 서버로 전송하는 요청하는 객체class |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Description |  |  |
+| 
+Attributes
+ | stdout | TEXT | public |
+|  | 표준 출력 결과 |  |  |
+|  | stderr | TEXT | public |
+|  | 오류 출력 결과 |  |  |
+|  | runtime | INT | public |
+|  | 코드 실행 시간 |  |  |
+|  | memory | INT | public |
+|  | 실행 시 사용된 메모리 량 |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Desciption |  |  |
+| Operations | 없음 | 없음 | 없음 |
+|  | 없음 |  |  |
+
+3.3.4 커뮤니티 DTO
+
+![3.3.4.png](./images/sds/3.3.4.png)
+
+| Class Diagram #14 : PostCreateRequest |  |  |  |
+| --- | --- | --- | --- |
+| Class
+Description | 사용자가 새로운 게시글을 작성할 때 서버로 전송하는 요청 객체 class |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Description |  |  |
+| 
+Attributes
+ | title | VARCHAR(50) | public |
+|  | 게시글 제목 |  |  |
+|  | content | TEXT | public |
+|  | 게시글 본문 내용 |  |  |
+|  | tags | String[] | public |
+|  | 게시글에 달린 태그 목록 |  |  |
+|  | isPoll | boolean | public |
+|  | 게시글이 투표형 게시글인지 여부 |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Desciption |  |  |
+| Operations | 없음 | 없음 | 없음 |
+|  | 없음 |  |  |
+
+| Class Diagram #15 : PostDetailResponse |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Class
+Description | 게시글의 상세 내용을 클라이언트에 반환할 때 사용되는 객체 class |  |  |  |  |  |  |
+| 구분 | Name | Type |  |  | Visibility |  |  |
+|  | Description |  |  |  |  |  |  |
+| 
+Attributes
+ | post_id | BIGINT |  |  | public |  |  |
+|  | 게시글 식별자 |  |  |  |  |  |  |
+|  | nickname | VARCHAR(50) |  |  | public |  |  |
+|  | 작성자 이름 또는 닉네임 |  |  |  |  |  |  |
+|  | title | VARCHAR(50) |  |  | public |  |  |
+|  | 게시글 제목 |  |  |  |  |  |  |
+|  | content | text |  |  | public |  |  |
+|  | 게시글 내용 |  |  |  |  |  |  |
+|  | createdAt |  | LocalDateTime |  |  | public |  |
+|  | 작성 시각 |  |  |  |  |  |  |
+|  | likeCount |  |  | INT |  |  | public |
+|  | 좋아요 수 |  |  |  |  |  |  |
+|  | coomentCount |  |  | VARCHAR(255) |  |  | public |
+|  | 댓글 수 |  |  |  |  |  |  |
+| 구분 | Name | Type |  |  | Visibility |  |  |
+|  | Desciption |  |  |  |  |  |  |
+| Operations | 없음 | 없음 |  |  | 없음 |  |  |
+|  | 없음 |  |  |  |  |  |  |
+
+| Class Diagram #16 : CommentCreateRequest |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- |
+| Class
+Description | 특정 게시글에 댓글을 작성할 때 서버로 전송하는 요청 객체 class |  |  |  |  |
+| 구분 | Name | Type |  | Visibility |  |
+|  | Description |  |  |  |  |
+| 
+Attributes
+ | post_id | BIGINT |  | public |  |
+|  | 댓글이 달릴 게시글의 ID |  |  |  |  |
+|  | content | text |  | public |  |
+|  | 댓글 본문 내용 |  |  |  |  |
+|  | isAnonymous |  | boolean |  | public |
+|  | 익명 여부 |  |  |  |  |
+| 구분 | Name | Type |  | Visibility |  |
+|  | Desciption |  |  |  |  |
+| Operations | 없음 | 없음 |  | 없음 |  |
+|  | 없음 |  |  |  |  |
+
+| Class Diagram #17 : PollCreateRequest |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Class
+Description | 투표형 게시글을 작성할 때 사용되는 요청 객체 class |  |  |  |  |  |  |
+| 구분 | Name | Type |  |  | Visibility |  |  |
+|  | Description |  |  |  |  |  |  |
+| 
+Attributes
+ | post_id | BIGINT |  |  | public |  |  |
+|  | 투표형 게시글의 ID |  |  |  |  |  |  |
+|  | options | String[] |  |  | public |  |  |
+|  | 투표 선택지 목록 |  |  |  |  |  |  |
+|  | endTime |  | LocalDateTime |  |  | public |  |
+|  | 투표 마감 시간 |  |  |  |  |  |  |
+|  | allowsMulti |  |  | boolean |  |  | public |
+|  | 복수 선택 허용 여부 |  |  |  |  |  |  |
+| 구분 | Name | Type |  |  | Visibility |  |  |
+|  | Desciption |  |  |  |  |  |  |
+| Operations | 없음 | 없음 |  |  | 없음 |  |  |
+|  | 없음 |  |  |  |  |  |  |
+
+3.3.5 관리 DTO
+
+![3.3.5.png](./images/sds/3.3.5.png)
+
+| Class Diagram #18 : ReportRespnose |  |  |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Class
+Description | 사용자가 제출한 신고 내역을 관리자가 조회하거나 검토할 때 반환되는 응답 객체 class |  |  |  |  |  |  |  |  |
+| 구분 | Name | Type |  |  |  | Visibility |  |  |  |
+|  | Description |  |  |  |  |  |  |  |  |
+| 
+Attributes
+ | report_id | BIGINT |  |  |  | public |  |  |  |
+|  | 신고 고유 식별자 |  |  |  |  |  |  |  |  |
+|  | nickname | VARCHAR(50) |  |  |  | public |  |  |  |
+|  | 신고자 이름 또는 닉네임 |  |  |  |  |  |  |  |  |
+|  | title | VARCHAR(50) |  |  |  | public |  |  |  |
+|  | 신고 제목 |  |  |  |  |  |  |  |  |
+|  | targetContentType | String[] |  |  |  | public |  |  |  |
+|  | 신고된 콘텐츠 유형(post, comment, problem 등) |  |  |  |  |  |  |  |  |
+|  | reason |  | TEXT |  |  |  | public |  |  |
+|  | 작성 시각 |  |  |  |  |  |  |  |  |
+|  | status |  |  | String[] |  |  |  | public |  |
+|  | 처리 상태(unprocessed, pending, processed 등) |  |  |  |  |  |  |  |  |
+|  | reportedAt |  |  | LocalDateTime |  |  |  | public |  |
+|  | 신고된 시각 |  |  |  |  |  |  |  |  |
+|  | processedAt |  |  |  | LocalDateTime |  |  |  | public |
+|  | 처리 완료 시각 |  |  |  |  |  |  |  |  |
+| 구분 | Name | Type |  |  |  | Visibility |  |  |  |
+|  | Desciption |  |  |  |  |  |  |  |  |
+| Operations | 없음 | 없음 |  |  |  | 없음 |  |  |  |
+|  | 없음 |  |  |  |  |  |  |  |  |
+
+| Class Diagram #19 : UserRoleUpdateRequest |  |  |  |
+| --- | --- | --- | --- |
+| Class
+Description | 관리자가 특정 사용자의 권한을 변경할 때 사용하는 요청 객체 class |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Description |  |  |
+| 
+Attributes
+ | user_id | BIGINT | public |
+|  | 변경 대상 사용자의 ID |  |  |
+|  | newRole | String[] | public |
+|  | 변경할 역할(INSTRUCTOR->ADMIN, USER->INSTRUCTOR 등) |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Desciption |  |  |
+| Operations | 없음 | 없음 | 없음 |
+|  | 없음 |  |  |
+
+| Class Diagram #20 : InstructorApplicationResponse |  |  |  |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Class
+Description | 일반 사용자가 제출한 강사 신청서에 대한 관리자 검토 결과를 반환하는 응답 객체 class |  |  |  |  |  |  |  |  |  |
+| 구분 | Name | Type |  |  |  |  | Visibility |  |  |  |
+|  | Description |  |  |  |  |  |  |  |  |  |
+| 
+Attributes
+ | application_id | BIGINT |  |  |  |  | public |  |  |  |
+|  | 강사 신청서 ID |  |  |  |  |  |  |  |  |  |
+|  | user_id | VARCHAR(50) |  |  |  |  | public |  |  |  |
+|  | 신청자 ID |  |  |  |  |  |  |  |  |  |
+|  | portfolioFileUrl | String |  |  |  |  | public |  |  |  |
+|  | 업로드된 포트폴리오 파일 경로 |  |  |  |  |  |  |  |  |  |
+|  | portfolioLinks | String |  |  |  |  | public |  |  |  |
+|  | 외부 링크(깃허브, 블로그 등) |  |  |  |  |  |  |  |  |  |
+|  | status |  | String[] |  |  |  |  | public |  |  |
+|  | 신청 상태(pending, approved, rejected 등) |  |  |  |  |  |  |  |  |  |
+|  | status |  |  | String[] |  |  |  |  | public |  |
+|  | 처리 상태(unprocessed, pending, processed 등) |  |  |  |  |  |  |  |  |  |
+|  | rejectionReason |  |  | TEXT |  |  |  |  | public |  |
+|  | 거절 사유(거절 시만 존재) |  |  |  |  |  |  |  |  |  |
+|  | submittedAt |  |  |  |  | LocalDateTime |  | public |  |  |
+|  | 신청 제출 시각 |  |  |  |  |  |  |  |  |  |
+|  | processedAt |  |  |  | LocalDateTime |  |  |  |  | public |
+|  | 처리 완료 시각 |  |  |  |  |  |  |  |  |  |
+| 구분 | Name | Type |  |  |  |  | Visibility |  |  |  |
+|  | Desciption |  |  |  |  |  |  |  |  |  |
+| Operations | 없음 | 없음 |  |  |  |  | 없음 |  |  |  |
+|  | 없음 |  |  |  |  |  |  |  |  |  |
+
+3.3.6 학습 확장 DTO 
+
+![3.3.6.png](./images/sds/3.3.6.png)
+
+| Class Diagram #21 : PollCreateRequest |  |  |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Class
+Description | 사용자가 학습 탭에서 볼 수 있는 강좌 목록을 서버에서 반환하는 응답 객체 class |  |  |  |  |  |  |  |  |
+| 구분 | Name | Type |  |  |  | Visibility |  |  |  |
+|  | Description |  |  |  |  |  |  |  |  |
+| 
+Attributes
+ | course_id | BIGINT |  |  |  | public |  |  |  |
+|  | 강좌 고유 식별자 |  |  |  |  |  |  |  |  |
+|  | courseName | VARCHAR(50) |  |  |  | public |  |  |  |
+|  | 강좌 이름 |  |  |  |  |  |  |  |  |
+|  | nickname |  | VARCHAR(50) |  |  |  | public |  |  |
+|  | 강좌 담당 강사명 |  |  |  |  |  |  |  |  |
+|  | description |  |  |  | TEXT |  |  |  | public |
+|  | 강좌 개요 또는 요약 설명 |  |  |  |  |  |  |  |  |
+|  | enrolledConut |  |  | INT |  |  |  | public |  |
+|  | 현재 수강 중인 사용자 수 |  |  |  |  |  |  |  |  |
+| 구분 | Name | Type |  |  |  | Visibility |  |  |  |
+|  | Desciption |  |  |  |  |  |  |  |  |
+| Operations | 없음 | 없음 |  |  |  | 없음 |  |  |  |
+|  | 없음 |  |  |  |  |  |  |  |  |
+
+| Class Diagram #22 : LectureResponse |  |  |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Class
+Description | 특정 강좌에 포함된 개별 강의 정보를 반환하는 응답 객체 class |  |  |  |  |  |  |  |  |
+| 구분 | Name | Type |  |  |  | Visibility |  |  |  |
+|  | Description |  |  |  |  |  |  |  |  |
+| 
+Attributes
+ | lecture_id | BIGINT |  |  |  | public |  |  |  |
+|  | 강의 고유 식별자 |  |  |  |  |  |  |  |  |
+|  | title | VARCHAR(50) |  |  |  | public |  |  |  |
+|  | 강의 제목 |  |  |  |  |  |  |  |  |
+|  | videoUrl |  | String |  |  |  | public |  |  |
+|  | 강의 영상 재생 링크 |  |  |  |  |  |  |  |  |
+|  | description |  |  |  | TEXT |  |  |  | public |
+|  | 강의 설명 |  |  |  |  |  |  |  |  |
+|  | durationMinutes |  |  | INT |  |  |  | public |  |
+|  | 강의 길이(분 단위) |  |  |  |  |  |  |  |  |
+| 구분 | Name | Type |  |  |  | Visibility |  |  |  |
+|  | Desciption |  |  |  |  |  |  |  |  |
+| Operations | 없음 | 없음 |  |  |  | 없음 |  |  |  |
+|  | 없음 |  |  |  |  |  |  |  |  |
+
+| Class Diagram #23 : UserRoleUpdateRequest |  |  |  |
+| --- | --- | --- | --- |
+| Class
+Description | 사용자가 특정 강좌를 수강 신청할 때 서버로 전송하는 요청 객체 class |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Description |  |  |
+| 
+Attributes
+ | course_id | BIGINT | public |
+|  | 수강할 강좌의 ID |  |  |
+|  | user_id | BIGINT | public |
+|  | 신청자(사용자)의 ID |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Desciption |  |  |
+| Operations | 없음 | 없음 | 없음 |
+|  | 없음 |  |  |
+
+### 3.4 기능별 상세 다이어그램
+
+3.4.1 사용자 관리
+
+![3.4.1.png](./images/sds/3.4.1.png)
+
+3.4.2 문제 및 코드 실행/채점
+
+![3.4.2.png](./images/sds/3.4.2.png)
+
+### 3.5 공통 모듈 다이어그램
+
+본 장에는 UnIDE 시스템을 공통 모듈 (Common & Util) 관점에서 클래스 다이어그램(CD)을 작성했다. 이를 통해 코드 중복을 최소화하고, 유지보수성과 확장성을 확보한다.
+주요 구성 요소로는 파일 관리(S3FileUploader, FileStoreService), 보안(SecurityConfig, JwtTokenProvider, UserDetailsServiceImpl), 공통 응답(ApiResponse), 예외 처리(GlobalExceptionHandler), 이메일 서비스(EmailService)가 있다.
+
+3.5.1 인증 및 보안 모듈 
+
+![3.5.1.png](./images/sds/3.5.1.png)
+
+| Class Diagram #24 : JwtTokenProvider |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- |
+| Class
+Description | JWT(Json Web Token)를 생성 및 검증하며, 로그인 성공 시 클라이언트로 토큰을 반환하는 class |  |  |  |  |
+| 구분 | Name | Type |  | Visibility |  |
+|  | Description |  |  |  |  |
+| 
+Attributes
+ | secretKey | String |  | public |  |
+|  | JWT 암호화 및 복호화에 사용하는 비밀 키 |  |  |  |  |
+|  | expirationTime | long |  | public |  |
+|  | 토큰 만료 시간(밀리초 단위) |  |  |  |  |
+| 구분 | Name | Type |  | Visibility |  |
+|  | Desciption |  |  |  |  |
+| Operations | generateToken | String |  | public |  |
+|  | Access Token 생성 |  |  |  |  |
+|  | validateToken |  | boolean |  | public |
+|  | 유효성 검증 |  |  |  |  |
+|  | getAuthentication | Authentication |  | public |  |
+|  | 토큰에서 인증 정보 추출 |  |  |  |  |
+
+| Class Diagram #25 : SecurityConfig |  |  |  |
+| --- | --- | --- | --- |
+| Class
+Description | JWT(Json Web Token)를 생성 및 검증하며, 로그인 성공 시 클라이언트로 토큰을 반환하는 class |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Description |  |  |
+| 
+Attributes
+ | jwtFilter | Filter | public |
+|  | JWT 인증 필터 |  |  |
+|  | passwordEncoder | PasswordEncoder | public |
+|  | 비밀번호 암호화기 |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Desciption |  |  |
+| Operations | configure | void | public |
+|  | 보안 정책 설정 |  |  |
+|  | jwtAuthenticationFilter | JwtAuthenticationFilter | public |
+|  | JWT 필터 반환 |  |  |
+
+| Class Diagram #26 : UserDetailServicelmpl |  |  |  |
+| --- | --- | --- | --- |
+| Class
+Description | Spring Security의 UserDetailService를 구현하여, DB의 사용자 정보를 인증에 사용하는 class |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Description |  |  |
+| 
+Attributes
+ | userRepository | UserRepository | public |
+|  | DB의 사용자 테이블 접근용 Repository 객체 |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Desciption |  |  |
+| Operations | localUserByUsername | UserDetils | public |
+|  | 보안 정책 설정 |  |  |
+|  | mapRolesToAuthorities | Collection<GrantedAuthorit> | public |
+|  | JWT 필터 반환 |  |  |
+
+3.5.2 파일 관리 모듈
+
+![3.5.2.png](./images/sds/3.5.2.png)
+
+| Class Diagram #27 : S3FileUploader |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- |
+| Class
+Description | AWS SDK를 사용하여 실제 파일 업로드와 삭제를 처리하는 class |  |  |  |  |
+| 구분 | Name | Type |  | Visibility |  |
+|  | Description |  |  |  |  |
+| 
+Attributes
+ | s3Client | AmazonS3 |  | public |  |
+|  | AWS SDK 클라이언트 |  |  |  |  |
+|  | bucketName | String |  | public |  |
+|  | 업로드 대상 버킷 이름 |  |  |  |  |
+| 구분 | Name | Type |  | Visibility |  |
+|  | Desciption |  |  |  |  |
+| Operations | upload | String |  | public |  |
+|  | 업로드 후 URL 반환 |  |  |  |  |
+|  | delete |  | void |  | public |
+|  | 파일 삭제 |  |  |  |  |
+|  | generateFileName | String |  | public |  |
+|  | UUID 기반 파일명 생성 |  |  |  |  |
+
+| Class Diagram #28 : FileStoreService |  |  |  |
+| --- | --- | --- | --- |
+| Class
+Description | 애플리케이션 내부에서 파일 업로드 삭제를 수행하는 비즈니스 서비스 계층 클래스 |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Description |  |  |
+| 
+Attributes
+ | uploader | S3FileUploader | public |
+|  | 실제 S3 업로드 담당 객체 |  |  |
+| 구분 | Name | Type | Visibility |
+|  | Desciption |  |  |
+| Operations | storeProfileImage | String | public |
+|  | 사용자 프로필 이미지 업로드 후 URL 반환 |  |  |
+|  | deleteFile | void | public |
+|  | S3 내 파일 삭제 요청 수행 |  |  |
+
+3.5.3 공동 응답 & 예외 처리 모듈 
+
+![3.5.3.png](./images/sds/3.5.3.png)
+
+| Class Diagram #29 : ApiResponse<T> |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- |
+| Class
+Description | API 응답 껍데기(Envelope)” 역할. 성공/실패 여부, 메시지, 실제 데이터 페이로드를 일관 포맷으로 캡슐화 class |  |  |  |  |
+| 구분 | Name | Type |  | Visibility |  |
+|  | Description |  |  |  |  |
+| 
+Attributes
+ | success | boolean |  | public |  |
+|  | 요청 성공 여부 |  |  |  |  |
+|  | message |  | String |  | public |
+|  | 사용자 또는 개발자용 요약 메시지 (i18n 대상 가능) |  |  |  |  |
+|  | data |  | T |  | public |
+|  | 실제 비즈니스 데이터. 실패 시 null(혹은 Void) 권장 |  |  |  |  |
+| 구분 | Name | Type |  | Visibility |  |
+|  | Desciption |  |  |  |  |
+| Operations | success | ApiResponse<T> |  | public |  |
+|  | 성공 응답을 빌드해 반환. success = true, message는 상황에 따라 “OK” 등 기본값 가능 |  |  |  |  |
+|  | error | ApiResponse<T> |  | public |  |
+|  | 실패 응답을 빌드해 반환. success = false, data = null |  |  |  |  |
+
+| Class Diagram #30 : GlobalExceptionHandler |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- |
+| Class
+Description | 전역 예외 처리 진입점. 컨트롤러 레이어에서 던져진 예외를 가로채서 HTTP 상태코드 + ApiResponse 포맷으로 변환 class |  |  |  |  |
+| 구분 | Name | Type |  | Visibility |  |
+|  | Description |  |  |  |  |
+| 
+Attributes
+ | logger | Logger |  | public |  |
+|  | 예외 상세(스택트레이스 포함) 기록 |  |  |  |  |
+| 구분 | Name | Type |  | Visibility |  |
+|  | Desciption |  |  |  |  |
+| Operations | handleValidationException | ResponseEntity<ApiResponse<Void>> |  | public |  |
+|  | 요청 바디/파라미터 검증 실패(Bean Validation) → 400 Bad Request |  |  |  |  |
+|  | handleAuthenticationException |  | ResponseEntity<ApiResponse<Void>> |  | public |
+|  | 인증 실패(자격 증명 오류, 만료된 토큰 등) → 401 Unauthorized |  |  |  |  |
+|  | handleCustomException | ResponseEntity<ApiResponse<Void>> |  | public |  |
+|  | 나머지 런타임 예외(비즈니스/서버 에러) → 500 Internal Server Error (또는 커스텀 매핑) |  |  |  |  |
+
+3.5.4 이메일 및 알림 모듈
+
+![3.5.4.png](./images/sds/3.5.4.png)
+
+| Class Diagram #31 : EmailService |  |  |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Class
+Description | 회원가입 인증, 강사 승인/거절 통지, 신고 처리 결과 등 이메일 알림 전송을 책임지는 인프라 모듈 class |  |  |  |  |  |  |  |  |
+| 구분 | Name | Type |  |  |  | Visibility |  |  |  |
+|  | Description |  |  |  |  |  |  |  |  |
+| 
+Attributes
+ | secretKey | String |  |  |  | public |  |  |  |
+|  | Spring의 메일 전송 엔진. SMTP(혹은 SES) 설정을 통해 실제 발송 처리 |  |  |  |  |  |  |  |  |
+|  | senderAddress |  |  | String |  |  |  | public |  |
+|  | From 주소. 도메인 인증(Sender Policy/DMARC) 적용된 발신 주소 사용 권장 |  |  |  |  |  |  |  |  |
+|  | expirationTime | long |  |  |  | public |  |  |  |
+|  | Thymeleaf/Freemarker 등 템플릿 엔진. 변수 치환 및 HTML 렌더링 담당 |  |  |  |  |  |  |  |  |
+| 구분 | Name | Type |  |  |  | Visibility |  |  |  |
+|  | Desciption |  |  |  |  |  |  |  |  |
+| Operations | sendVerificationEmail | void |  |  |  | public |  |  |  |
+|  | 회원가입/비밀번호 재설정 등 인증 코드 메일 전송 |  |  |  |  |  |  |  |  |
+|  | sendInstructorApprovalEmail |  |  |  | void |  |  |  | public |
+|  | 강사 신청 결과(승인/거절) 통지. 거절 시 사유 추가 가능(확장: reason) |  |  |  |  |  |  |  |  |
+|  | sendReportNoticeEmail |  |  |  | void |  |  |  | public |
+|  | 신고 처리 결과 안내 메일 |  |  |  |  |  |  |  |  |
+|  | sendTemplate |  |  |  | void |  |  |  | public |
+|  | 공용 템플릿 발송. 템플릿명 + 모델(Map) 기반으로 HTML 생성 후 전송 |  |  |  |  |  |  |  |  |
+|  | validateEmail |  | boolean |  |  |  | public |  |  |
+|  | 이메일 형식 검증(정규식). 필요 시 도메인 MX 레코드 검사로 확장 |  |  |  |  |  |  |  |  |
+|  | buildMessage | MimeMessage |  |  |  | public |  |  |  |
+|  | HTML 본문을 포함하는 MIME 메시지 생성(첨부파일/인라인 이미지 확장 가능) |  |  |  |  |  |  |  |  |
+
 ---
 
 ## 4. Sequence diagram
@@ -4262,7 +5130,7 @@ Guide DB에서 매핑된 가이드가 존재하는 경우, IDE는 개선 설명�
 
 **4.38 Create Study Group**
 
-![그림 [4-38]](./images/sds/4.38.png)
+![그림 [4-38]](./images/sds/studygroup%20create.drawio.png)
 
 그림 [4-38]
 
@@ -4313,6 +5181,27 @@ Guide DB에서 매핑된 가이드가 존재하는 경우, IDE는 개선 설명�
 위 그림 4-44은 사용자가 자신이 속한 스터디 그룹의 세션을 생성하거나 참여하는 과정을 나타낸 시퀀스 다이어그램이다.
 사용자가 스터디 그룹에 접속하면 Study Group Service가 권한을 확인한 뒤, Study Group DB와 Member DB를 업데이트하여 세션 정보를 등록한다.
 이후 시스템은 세션 참여 결과를 사용자에게 반환한다.
+
+**4.45 Study Group Delete**
+![그림[4-45]](./images/sds/studygroup%20delete.drawio.png)
+
+그림 [4-45]
+
+위 그림 4-45는 사용자가 자신이 생성한 스터디 그룹을 삭제하는 과정을 나타낸 시퀀스 다이어그램이다.
+사용자가 메인 페이지에서 스터디 그룹 서비스를 선택한 뒤 그룹 삭제를 요청하면, Study Group Service는 Study Group DB를 통해 해당 사용자가 그룹 리더인지 먼저 확인한다.
+리더임이 확인되면 Study Group Service는 Study Group DB, Member DB, Study Group Discuss Board DB, Study Group Log DB, Study Group Problem DB에 순차적으로 삭제 요청을 보내 그룹과 관련된 모든 데이터를 제거한다.
+모든 삭제 작업이 완료되면 시스템은 삭제 완료 메시지를 사용자에게 반환한다.
+
+**4.46 Study Group Specifies Problem**
+![그림[4-46]](./images/sds/studygroup%20specify%20problem.drawio.png)
+
+그림[4-46]
+
+위 그림 4-46은 사용자가 스터디 그룹에 문제를 지정하는 과정을 나타낸 시퀀스 다이어그램이다.
+사용자가 스터디 그룹 서비스에 접속하면 시스템은 먼저 Study Group Member DB를 조회하여 해당 사용자의 권한을 확인한다.
+권한 검증이 완료되면, 시스템은 Problem DB로부터 사용자가 선택한 문제 정보를 조회한 뒤, Study Group Problem DB에 문제 지정 정보를 등록한다.
+모든 과정이 정상적으로 수행되면 시스템은 문제 지정 완료 메시지를 사용자에게 반환한다.
+
 
 ---
 

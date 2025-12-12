@@ -1,0 +1,81 @@
+package com.unide.backend.domain.mypage.controller;
+
+import java.time.LocalDateTime;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.unide.backend.domain.mypage.dto.MyPageResponseDto;
+import com.unide.backend.domain.mypage.dto.MyPageUpdateRequestDto;
+import com.unide.backend.domain.mypage.dto.MyPageUpdateResponseDto;
+import com.unide.backend.domain.mypage.service.MyPageService;
+import com.unide.backend.global.security.auth.PrincipalDetails;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping("/api/mypage")
+@RequiredArgsConstructor
+public class MyPageController {
+
+    private final MyPageService myPageService;
+
+    /** 내 마이페이지 조회 */
+    @GetMapping
+    public ResponseEntity<MyPageResponseDto> getMyPage(
+            @AuthenticationPrincipal PrincipalDetails principal
+    ) {
+        Long userId = principal.getUser().getId();
+        return ResponseEntity.ok(myPageService.getMyPage(userId));
+    }
+
+    /** 닉네임으로 마이페이지 조회 */
+    @GetMapping("/{nickname}")
+    public ResponseEntity<MyPageResponseDto> getMyPageByNickname(
+            @PathVariable String nickname,
+            @AuthenticationPrincipal PrincipalDetails principal
+    ) {
+        Long requestUserId = (principal != null) ? principal.getUser().getId() : null;
+        return ResponseEntity.ok(myPageService.getMyPageByNickname(nickname, requestUserId));
+    }
+
+    /** 내 프로필 업데이트 */
+    @PatchMapping(value = "", consumes = "multipart/form-data")
+    public ResponseEntity<MyPageResponseDto> updateMyPage(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @Valid @RequestPart("data") MyPageUpdateRequestDto requestDto,
+            @RequestPart(value = "avatarImageFile", required = false) MultipartFile imageFile
+    ) {
+        Long userId = principalDetails.getUser().getId();
+
+        MyPageResponseDto response = myPageService.updateMyPage(
+                userId,
+                requestDto,
+                imageFile
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+
+
+
+
+    @PostMapping("initialize")
+    public ResponseEntity<MyPageUpdateResponseDto> initializeMyPage(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+        Long userId = principalDetails.getUser().getId();
+        MyPageResponseDto result = myPageService.initializeMyPage(userId);
+        LocalDateTime updatedAt = result.getUpdatedAt();
+        return ResponseEntity.ok(new MyPageUpdateResponseDto("마이페이지가 초기화되었습니다.", updatedAt));
+    }
+    
+}
